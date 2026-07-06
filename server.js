@@ -98,6 +98,28 @@ app.get('/api/balance', async (req, res) => {
   });
 });
 
+app.post('/api/auth/register', async (req, res) => {
+  const { user_id, password } = req.body;
+  if (!user_id || !password) return res.status(400).json({ error: 'Missing credentials' });
+  const user = await db.registerWebUser(user_id, password);
+  if (user) {
+    res.json({ success: true, user_id: user_id });
+  } else {
+    res.status(500).json({ error: 'Registration failed or user exists' });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  const { user_id, password } = req.body;
+  if (!user_id || !password) return res.status(400).json({ error: 'Missing credentials' });
+  const user = await db.loginWebUser(user_id, password);
+  if (user) {
+    res.json({ success: true, user_id: user_id });
+  } else {
+    res.status(401).json({ error: 'Invalid ID or password' });
+  }
+});
+
 app.post('/api/update_name', async (req, res) => {
   const { user_id, first_name, username } = req.body;
   if (!user_id) return res.status(400).json({ error: 'User ID is required' });
@@ -138,22 +160,18 @@ app.post('/api/game_played', async (req, res) => {
 });
 
 app.get('/api/game_state', async (req, res) => {
-  const { room } = req.query;
-  const roomState = rooms[room || '10'];
-  if (!roomState) return res.status(400).json({ error: 'Invalid room' });
-  
-  // Calculate total cards bought
-  const playersList = Object.values(roomState.players);
+  // Calculate total cards bought in the global game
+  const playersList = Object.values(globalGame.players);
   let totalCardsCount = 0;
   playersList.forEach(p => {
     totalCardsCount += p.cardNumbers.length;
   });
 
   res.json({
-    game_running: roomState.status === 'running',
-    game_id: roomState.gameId,
-    time_left: roomState.timeLeft,
-    called_numbers: roomState.calledNumbers,
+    game_running: globalGame.status === 'running',
+    game_id: globalGame.gameId,
+    time_left: globalGame.timeLeft,
+    called_numbers: globalGame.calledNumbers,
     total_players: totalCardsCount
   });
 });
@@ -201,59 +219,44 @@ const io = new Server(server, {
   }
 });
 
-// Game rooms configuration
-const rooms = {
-  '10': {
-    roomId: '10',
-    stake: 10,
-    status: 'waiting',
-    timeLeft: 35,
-    gameId: generateGameId(),
-    calledNumbers: [],
-    players: {}, // userId -> { userId, name, cards: [Array of card grids], cardNumbers: [Array of card IDs] }
-    winners: [],
-    timer: null,
-    maxWinners: 1,
-    ballTimer: null
-  },
-  '20': {
-    roomId: '20',
-    stake: 20,
-    status: 'waiting',
-    timeLeft: 35,
-    gameId: generateGameId(),
-    calledNumbers: [],
-    players: {},
-    winners: [],
-    timer: null,
-    maxWinners: 1,
-    ballTimer: null
-  }
+// Global Game Configuration
+const globalGame = {
+  roomId: 'global',
+  status: 'waiting',
+  timeLeft: 35,
+  gameId: generateGameId(),
+  calledNumbers: [],
+  players: {}, // userId -> { userId, name, cards, cardNumbers, stake }
+  winners: [],
+  timer: null,
+  maxWinners: 1,
+  ballTimer: null,
+  totalPot: 0
 };
 
-// Start countdown logic for a room
-function startRoomCountdown(room) {
-  if (room.timer) return;
-  room.timer = setInterval(() => {
-    if (room.status !== 'waiting') return;
+// Start countdown logic for the global game
+function startGameCountdown(game) {
+  if (game.timer) return;
+  game.timer = setInterval(() => {
+    if (game.status !== 'waiting') return;
     
-    room.timeLeft--;
+    game.timeLeft--;
     
-    io.to(room.roomId).emit('countdown_update', {
-      room: room.roomId,
-      game_id: room.gameId,
-      time_left: room.timeLeft
+    io.to(game.roomId).emit('countdown_update', {
+      room: game.roomId,
+      game_id: game.gameId,
+      time_left: game.timeLeft
     });
     
-    if (room.timeLeft <= 0) {
-      tryStartGame(room);
+    if (game.timeLeft <= 0) {
+      tryStartGame(game);
     }
   }, 1000);
 }
 
-// Attempt to start a game in a room
-function tryStartGame(room) {
-  const playersList = Object.values(room.players);
+// Attempt to start the game
+function tryStartGame(game) {
+  const playersList = Object.values(game.players);
   let totalCardsCount = 0;
   playersList.forEach(p => {
     totalCardsCount += p.cardNumbers.length;
@@ -261,30 +264,30 @@ function tryStartGame(room) {
 
   if (totalCardsCount >= 1) {
     // We have players, let's start!
-    clearInterval(room.timer);
-    room.timer = null;
-    room.status = 'running';
-    room.calledNumbers = [];
-    room.winners = [];
+    clearInterval(game.timer);
+    game.timer = null;
+    game.status = 'running';
+    game.calledNumbers = [];
+    game.winners = [];
 
-    io.to(room.roomId).emit('game_started', {
-      room: room.roomId,
-      game_id: room.gameId,
+    io.to(game.roomId).emit('game_started', {
+      room: game.roomId,
+      game_id: game.gameId,
       total_players: totalCardsCount
     });
 
     // Start drawing balls
-    startBallDrawing(room);
+    startBallDrawing(game);
   } else {
     // No players, reset countdown and keep waiting
-    room.timeLeft = 35;
-    room.gameId = generateGameId();
+    game.timeLeft = 35;
+    game.gameId = generateGameId();
   }
 }
 
 // Ball calling logic
-function startBallDrawing(room) {
-  if (room.ballTimer) clearInterval(room.ballTimer);
+function startBallDrawing(game) {
+  if (game.ballTimer) clearInterval(game.ballTimer);
   
   const pool = [];
   for (let i = 1; i <= 75; i++) pool.push(i);
@@ -299,14 +302,14 @@ function startBallDrawing(room) {
   
   // Wait 2 seconds (GET READY phase) before first ball
   setTimeout(() => {
-    if (room.status !== 'running') return;
+    if (game.status !== 'running') return;
     
     drawBall();
     
-    room.ballTimer = setInterval(() => {
-      if (room.status !== 'running') {
-        clearInterval(room.ballTimer);
-        room.ballTimer = null;
+    game.ballTimer = setInterval(() => {
+      if (game.status !== 'running') {
+        clearInterval(game.ballTimer);
+        game.ballTimer = null;
         return;
       }
       drawBall();
@@ -314,41 +317,40 @@ function startBallDrawing(room) {
   }, 2000);
 
   function drawBall() {
-    if (index >= 75 || room.status !== 'running') {
-      clearInterval(room.ballTimer);
-      room.ballTimer = null;
-      endGame(room);
+    if (index >= 75 || game.status !== 'running') {
+      clearInterval(game.ballTimer);
+      game.ballTimer = null;
+      endGame(game);
       return;
     }
     
     const num = pool[index++];
-    room.calledNumbers.push(num);
+    game.calledNumbers.push(num);
     
-    io.to(room.roomId).emit('ball_called', {
-      room: room.roomId,
+    io.to(game.roomId).emit('ball_called', {
+      room: game.roomId,
       number: num
     });
   }
 }
 
-// Reset room state
-function endGame(room) {
-  if (room.ballTimer) clearInterval(room.ballTimer);
-  room.ballTimer = null;
+// Reset game state
+function endGame(game) {
+  if (game.ballTimer) clearInterval(game.ballTimer);
+  game.ballTimer = null;
   
-  room.status = 'waiting';
-  room.timeLeft = 35;
-  room.gameId = generateGameId();
-  room.players = {};
-  room.calledNumbers = [];
-  room.winners = [];
+  game.status = 'waiting';
+  game.timeLeft = 35;
+  game.gameId = generateGameId();
+  game.players = {};
+  game.calledNumbers = [];
+  game.winners = [];
   
-  startRoomCountdown(room);
+  startGameCountdown(game);
 }
 
-// Start countdowns immediately
-startRoomCountdown(rooms['10']);
-startRoomCountdown(rooms['20']);
+// Start countdown immediately
+startGameCountdown(globalGame);
 
 // Socket.io event handling
 io.on('connection', (socket) => {
@@ -356,151 +358,124 @@ io.on('connection', (socket) => {
   let currentUserId = null;
 
   socket.on('join_room', (data) => {
-    const { room } = data;
-    if (rooms[room]) {
-      if (currentRoom) {
-        socket.leave(currentRoom);
-      }
-      currentRoom = room;
-      socket.join(room);
-      
-      // Send initial game state
-      const roomState = rooms[room];
-      const playersList = Object.values(roomState.players);
-      let totalCardsCount = 0;
-      playersList.forEach(p => {
-        totalCardsCount += p.cardNumbers.length;
-      });
-
-      socket.emit('countdown_update', {
-        room: room,
-        game_id: roomState.gameId,
-        time_left: roomState.timeLeft
-      });
-      
-      socket.emit('game_state_update', {
-        room: room,
-        total_players: totalCardsCount
-      });
+    // Always join the global room
+    if (currentRoom) {
+      socket.leave(currentRoom);
     }
-  });
-
-  socket.on('leave_room', (data) => {
-    const { room } = data;
-    socket.leave(room);
-    if (currentRoom === room) {
-      currentRoom = null;
-    }
-  });
-
-  socket.on('request_countdown', (data) => {
-    const { room, game_id } = data;
-    const roomState = rooms[room];
-    if (roomState && roomState.gameId === game_id) {
-      socket.emit('countdown_update', {
-        room: room,
-        game_id: roomState.gameId,
-        time_left: roomState.timeLeft
-      });
-    }
-  });
-
-  socket.on('player_ready', (data) => {
-    const { user_id, name, cards, game_id, room: roomId } = data;
-    const room = rooms[roomId];
-    if (!room) return;
+    currentRoom = globalGame.roomId;
+    socket.join(currentRoom);
     
-    currentUserId = user_id;
-    
-    // Store player details and generate their cards deterministically
-    const cardGrids = cards.map(cId => generateCardDeterministic(cId));
-    room.players[user_id] = {
-      userId: user_id,
-      name: name || 'Anonymous',
-      cards: cardGrids,
-      cardNumbers: cards
-    };
-
-    // Calculate total cards
-    const playersList = Object.values(room.players);
+    // Send initial game state
+    const playersList = Object.values(globalGame.players);
     let totalCardsCount = 0;
     playersList.forEach(p => {
       totalCardsCount += p.cardNumbers.length;
     });
 
-    // Notify room of new ready player
-    io.to(room.roomId).emit('player_joined', {
-      room: room.roomId,
+    socket.emit('countdown_update', {
+      room: currentRoom,
+      game_id: globalGame.gameId,
+      time_left: globalGame.timeLeft
+    });
+    
+    socket.emit('game_state_update', {
+      room: currentRoom,
       total_players: totalCardsCount
     });
   });
 
-  socket.on('declare_winner', async (data) => {
-    const { user_id, name, card_num, card_index, game_id, room: roomId } = data;
-    const room = rooms[roomId];
-    if (!room || room.status !== 'running' || room.gameId !== game_id) return;
+  socket.on('leave_room', (data) => {
+    socket.leave(globalGame.roomId);
+    currentRoom = null;
+  });
+
+  socket.on('request_countdown', (data) => {
+    const { game_id } = data;
+    if (globalGame.gameId === game_id) {
+      socket.emit('countdown_update', {
+        room: globalGame.roomId,
+        game_id: globalGame.gameId,
+        time_left: globalGame.timeLeft
+      });
+    }
+  });
+
+  socket.on('player_ready', (data) => {
+    const { user_id, name, cards, game_id, stake } = data;
+    if (globalGame.status !== 'waiting') return; // Cannot join running game
     
-    const player = room.players[user_id];
+    currentUserId = user_id;
+    
+    // Store player details and generate their cards deterministically
+    const cardGrids = cards.map(cId => generateCardDeterministic(cId));
+    globalGame.players[user_id] = {
+      userId: user_id,
+      name: name || 'Anonymous',
+      cards: cardGrids,
+      cardNumbers: cards,
+      stake: Number(stake) || 10
+    };
+
+    // Calculate total cards and total pot
+    const playersList = Object.values(globalGame.players);
+    let totalCardsCount = 0;
+    globalGame.totalPot = 0;
+    playersList.forEach(p => {
+      totalCardsCount += p.cardNumbers.length;
+      globalGame.totalPot += p.cardNumbers.length * p.stake;
+    });
+
+    // Notify room of new ready player
+    io.to(globalGame.roomId).emit('player_joined', {
+      room: globalGame.roomId,
+      total_players: totalCardsCount,
+      total_pot: globalGame.totalPot
+    });
+  });
+
+  socket.on('declare_winner', async (data) => {
+    const { user_id, name, card_num, card_index, game_id } = data;
+    if (globalGame.status !== 'running' || globalGame.gameId !== game_id) return;
+    
+    const player = globalGame.players[user_id];
     if (!player) return;
     
     const card = player.cards[card_index];
     if (!card) return;
     
     // Verify no double declarations for the exact card
-    if (room.winners.some(w => w.userId === user_id && w.cardNum === card_num)) return;
+    if (globalGame.winners.some(w => w.userId === user_id && w.cardNum === card_num)) return;
+
+    // Called numbers set
+    const calledSet = new Set(globalGame.calledNumbers);
     
-    // Validate card pattern on server
-    const calledSet = new Set(room.calledNumbers);
-    const isWinner = verifyWin(card, calledSet);
+    const isValidWin = verifyWin(card, calledSet);
     
-    if (isWinner) {
-      const playersList = Object.values(room.players);
-      let totalCardsCount = 0;
-      playersList.forEach(p => {
-        totalCardsCount += p.cardNumbers.length;
-      });
-      
-      const totalPot = totalCardsCount * room.stake;
-      const totalPrize = Math.round(totalPot * 0.8);
-      
-      room.winners.push({
+    if (isValidWin) {
+      globalGame.winners.push({
         userId: user_id,
-        name: name,
+        name: player.name,
         cardNum: card_num,
-        prize: totalPrize
+        cardIndex: card_index
       });
       
-      // If we reach maxWinners, end game and distribute prizes
-      if (room.winners.length >= room.maxWinners) {
-        if (room.ballTimer) clearInterval(room.ballTimer);
-        room.ballTimer = null;
+      // If we reached max winners, end round
+      if (globalGame.winners.length >= globalGame.maxWinners) {
+        clearInterval(globalGame.ballTimer);
+        globalGame.ballTimer = null;
         
-        const winnerCount = room.winners.length;
-        const prizeEach = Math.floor(totalPrize / winnerCount);
+        const totalPrize = Math.round(globalGame.totalPot * 0.8);
         
-        for (const w of room.winners) {
-          w.prize = prizeEach;
-          await db.addWin(w.userId, prizeEach, room.gameId);
-          await db.updateGameHistoryResult(w.userId, room.gameId, `Won ${prizeEach} Br`);
-        }
-        
-        io.to(room.roomId).emit('winner_found', {
-          room: room.roomId,
-          winner_name: room.winners[0].name,
-          winner_card: room.winners[0].cardNum,
-          prize: totalPrize,
-          winners: room.winners
-        });
-        
-        io.to(room.roomId).emit('game_ended', {
-          room: room.roomId,
-          winners: room.winners,
-          prize: totalPrize
+        io.to(globalGame.roomId).emit('game_ended', {
+          room: globalGame.roomId,
+          game_id: globalGame.gameId,
+          winners: globalGame.winners,
+          total_prize: totalPrize
         });
         
         setTimeout(() => {
-          endGame(room);
-        }, 8000);
+          endGame(globalGame);
+        }, 15000); // Wait 15s to show winners screen before new game
       }
     }
   });
