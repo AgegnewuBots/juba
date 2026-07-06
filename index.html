@@ -12,18 +12,21 @@
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --bg:#070713;--bg2:rgba(26, 26, 54, 0.75);--bg3:#04040a;
-  --orange:#f97316;--green:#10b981;--blue:#06b6d4;
-  --purple:#8b5cf6;--pink:#ec4899;--yellow:#f59e0b;
-  --text:#f8fafc;--muted:rgba(248, 250, 252, 0.55);
-  --shadow-glow:0 0 20px rgba(6, 182, 212, 0.25);
-  --glass-border:rgba(255, 255, 255, 0.08);
+  --bg:#070713;--bg2:rgba(30, 30, 60, 0.65);--bg3:#04040a;
+  --orange:#ff6b00;--green:#00e676;--blue:#00d4ff;
+  --purple:#b388ff;--pink:#ff4081;--yellow:#ffd600;
+  --text:#f8fafc;--muted:rgba(248, 250, 252, 0.6);
+  --shadow-glow:0 0 25px rgba(0, 212, 255, 0.3);
+  --glass-border:rgba(255, 255, 255, 0.1);
+  --glass-bg:rgba(15, 15, 35, 0.5);
 }
-body{font-family:'Outfit',sans-serif;background:radial-gradient(ellipse at top, #1a153b 0%, #070713 100%);color:var(--text);overflow-x:hidden;min-height:100vh;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 15% 50%, rgba(255, 107, 0, 0.08), transparent 40%),radial-gradient(circle at 85% 30%, rgba(0, 212, 255, 0.08), transparent 40%),radial-gradient(circle at 50% 80%, rgba(179, 136, 255, 0.05), transparent 50%);z-index:-1;animation:ambientGlow 15s ease-in-out infinite alternate;}
+@keyframes ambientGlow { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--bg3); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 .app{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:60px;}
 .screen{display:none;flex:1;flex-direction:column;}
 .screen.active{display:flex;}
@@ -100,18 +103,22 @@ body{font-family:'Outfit',sans-serif;background:radial-gradient(ellipse at top, 
 .stat-val.green{color:var(--green);}
 .stat-val.yellow{color:var(--yellow);}
 .stat-val.orange{color:var(--orange);}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:rgba(7,7,19,0.92);backdrop-filter:blur(16px);border-top:1px solid rgba(249,115,22,0.15);display:flex;z-index:100;box-shadow:0 -4px 30px rgba(0,0,0,0.5);}
-.nav-btn{flex:1;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:transparent;color:var(--muted);font-size:10px;font-weight:600;transition:all .2s;position:relative;}
-.nav-btn.active{color:var(--orange);}
-.nav-btn.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);border-radius:2px;}
-.nav-btn .nav-icon{font-size:20px;line-height:1;}
+.bottom-nav{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:calc(100% - 30px);max-width:360px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:24px;display:flex;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);padding:4px 8px;}
+.nav-btn{flex:1;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;border:none;background:transparent;color:var(--muted);font-size:10px;font-weight:700;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);position:relative;}
+.nav-btn.active{color:var(--blue);transform:translateY(-2px);}
+.nav-btn.active::before{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:20px;height:4px;background:var(--blue);border-radius:4px;box-shadow:0 0 10px var(--blue);}
+.nav-btn .nav-icon{font-size:20px;line-height:1;transition:all 0.3s;}
+.nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px var(--blue));}
 .select-info{background:var(--bg2);text-align:center;padding:5px 12px;font-size:11px;font-weight:700;color:var(--blue);border-bottom:1px solid rgba(255,255,255,0.07);letter-spacing:0.3px;text-shadow:0 0 6px rgba(74,158,255,0.4);}
 .select-info span{color:var(--yellow);font-weight:800;}
 .game-id-bar{background:var(--bg3);text-align:center;padding:2px 3px;font-size:9px;font-weight:800;color:var(--yellow);letter-spacing:0.5px;text-shadow:0 0 8px rgba(255,215,0,0.4);}
 .game-id-bar span{color:var(--yellow);font-weight:700;}
-.cards-scroll{flex:1;overflow-y:auto;padding:5px;background:radial-gradient(ellipse at 50% 30%,rgba(74,158,255,0.07) 0%,rgba(155,89,182,0.05) 50%,transparent 80%);}
-.cards-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
-.card-cell{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;cursor:pointer;background:rgba(26,26,54,0.6);color:var(--text);border:1px solid rgba(255,255,255,0.06);transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);user-select:none;backdrop-filter:blur(4px);}
+.cards-scroll{flex:1;overflow-y:auto;padding:10px 5px;background:radial-gradient(ellipse at 50% -20%,rgba(0, 212, 255, 0.1) 0%,rgba(179, 136, 255, 0.05) 50%,transparent 100%);}
+.cards-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;}
+.card-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;background:var(--glass-bg);color:var(--text);border:1px solid var(--glass-border);transition:all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);user-select:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;overflow:hidden;}
+.card-cell:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.3);}
+.card-cell::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,0.1) 50%,transparent 60%);transition:none;opacity:0;}
+.card-cell.selected::after{opacity:1;animation:btnShimmer 3s ease-in-out infinite;}
 .card-cell:active{transform:scale(0.93);}
 .card-cell.selected{background:linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);color:#fff;border-color:var(--green);box-shadow:0 0 12px rgba(16,185,129,0.6),inset 0 1px 0 rgba(255,255,255,0.2);transform:scale(1.05);font-weight:800;}
 .card-cell.disabled{opacity:0.25;cursor:not-allowed;}
@@ -135,25 +142,27 @@ body{font-family:'Outfit',sans-serif;background:radial-gradient(ellipse at top, 
 .bingo-header-row{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:2px;flex-shrink:0;}
 .bh{text-align:center;font-size:12px;font-weight:700;padding:4px 1px;border-radius:4px;color:#fff;}
 .bh.B{background:#00b0ff;}.bh.I{background:#d500f9;}.bh.N{background:#ff4081;}.bh.G{background:#ffd600;color:#000;}.bh.O{background:#ff7b00;color:#000;}
-.num-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;flex:1;}
-.num-cell{border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--bg2);color:var(--text);border:1px solid rgba(255,255,255,0.06);transition:all .2s;}
-.num-cell.called{color:#000;border-color:transparent;}
-.num-cell.current{color:#000;border-color:transparent;transform:scale(1.06);}
+.num-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;flex:1;}
+.num-cell{border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:var(--glass-bg);color:var(--muted);border:1px solid var(--glass-border);transition:all .3s;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);}
+.num-cell.called{color:#fff;background:rgba(0, 212, 255, 0.15);border-color:rgba(0, 212, 255, 0.4);text-shadow:0 0 8px rgba(0, 212, 255, 0.8);}
+.num-cell.current{color:#000;background:var(--yellow);border-color:transparent;transform:scale(1.15);box-shadow:0 0 15px var(--yellow);z-index:2;text-shadow:none;}
 .right-col{width:165px;padding:4px 4px 4px 2px;display:flex;flex-direction:column;gap:4px;overflow:hidden;}
 .recent-balls{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;}
-.rball{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-direction:column;}
+.rball{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-direction:column;box-shadow:inset 0 1px 2px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.5);}
 .rball .rl{font-size:6px;opacity:.8;}
 .rball .rn{font-size:9px;}
-.current-box{background:rgba(26,26,54,0.8);backdrop-filter:blur(8px);border-radius:8px;padding:5px 6px;text-align:center;border:1px solid rgba(255,255,255,0.06);}
-.current-label{font-size:9px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;}
-.current-ball-big{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;font-weight:800;margin:auto;border:2px solid rgba(255,255,255,0.15);}
-.cbl{font-size:9px;opacity:.9;}
-.cbn{font-size:22px;line-height:1;}
-.controls-row{display:flex;gap:4px;align-items:center;background:rgba(26,26,54,0.6);backdrop-filter:blur(6px);border-radius:8px;padding:4px 6px;border:1px solid rgba(255,255,255,0.04);}
+.current-box{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:12px;padding:8px;text-align:center;border:1px solid var(--glass-border);box-shadow:0 4px 15px rgba(0,0,0,0.3);}
+.current-label{font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;}
+.current-ball-big{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;font-weight:800;margin:auto;border:2px solid rgba(255,255,255,0.15);box-shadow:0 0 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.3);transition:all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+.cbl{font-size:10px;opacity:.9;}
+.cbn{font-size:26px;line-height:1;}
+.ball-pop{animation:ballPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+@keyframes ballPop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+.controls-row{display:flex;gap:4px;align-items:center;background:var(--glass-bg);backdrop-filter:blur(16px);border-radius:10px;padding:6px;border:1px solid var(--glass-border);}
 .ctrl-item{display:flex;align-items:center;gap:4px;flex:1;}
-.ctrl-lbl{font-size:9px;font-weight:600;}
-.ctrl-lbl.green{color:var(--green);}
-.ctrl-lbl.blue{color:var(--blue);}
+.ctrl-lbl{font-size:10px;font-weight:700;letter-spacing:0.5px;}
+.ctrl-lbl.green{color:var(--green);text-shadow:0 0 5px rgba(0, 230, 118, 0.4);}
+.ctrl-lbl.blue{color:var(--blue);text-shadow:0 0 5px rgba(0, 212, 255, 0.4);}
 .toggle{width:32px;height:18px;border-radius:9px;background:rgba(255,255,255,0.2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
 .toggle.on{background:var(--green);}
 .toggle.blue-on{background:var(--blue);}
@@ -178,25 +187,25 @@ body{font-family:'Outfit',sans-serif;background:radial-gradient(ellipse at top, 
 @keyframes bounce{from{transform:translateY(0) scale(1);}to{transform:translateY(-12px) scale(1.05);}}
 .winner-title{font-size:22px;font-weight:900;color:var(--yellow);letter-spacing:3px;margin:5px 0 2px;text-shadow:0 0 20px rgba(245,158,11,0.4);}
 .winners-names-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:6px 0 8px;width:100%;}
-.winner-name-chip{display:flex;align-items:center;gap:5px;background:rgba(245,158,11,0.1);backdrop-filter:blur(8px);border:1px solid rgba(245,158,11,0.3);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:700;color:var(--yellow);box-shadow:0 2px 12px rgba(245,158,11,0.15);}
+.winner-name-chip{display:flex;align-items:center;gap:5px;background:rgba(255, 214, 0, 0.15);backdrop-filter:blur(8px);border:1px solid rgba(255, 214, 0, 0.4);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:700;color:var(--yellow);box-shadow:0 0 15px rgba(255, 214, 0, 0.2);}
 .winner-name-chip .wn-crown{font-size:14px;}
 .winner-name-chip .wn-card{font-size:10px;color:var(--muted);margin-left:2px;}
-.winner-card-box{background:rgba(26,26,54,0.8);backdrop-filter:blur(8px);border:2px solid var(--yellow);border-radius:12px;padding:8px;margin:2px 0 8px;width:100%;max-width:240px;box-shadow:0 0 25px rgba(245,158,11,0.15);}
+.winner-card-box{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:2px solid var(--yellow);border-radius:12px;padding:8px;margin:2px 0 8px;width:100%;max-width:240px;box-shadow:0 0 30px rgba(255, 214, 0, 0.25), inset 0 2px 10px rgba(255, 214, 0, 0.1);}
 .winner-card-hdr{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:3px;}
-.wch{height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;margin:auto;width:22px;}
-.wch.B{background:#06b6d4;}.wch.I{background:#8b5cf6;}.wch.N{background:#ec4899;}.wch.G{background:#f59e0b;color:#000;}.wch.O{background:#f97316;color:#000;}
+.wch{height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;margin:auto;width:22px;box-shadow:0 2px 5px rgba(0,0,0,0.5);}
+.wch.B{background:var(--blue);}.wch.I{background:var(--purple);}.wch.N{background:var(--pink);}.wch.G{background:var(--yellow);color:#000;}.wch.O{background:var(--orange);color:#000;}
 .winner-card-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
-.wcc{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--bg3);color:var(--text);border:1px solid rgba(255,255,255,0.06);}
+.wcc{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:rgba(0,0,0,0.3);color:var(--text);border:1px solid rgba(255,255,255,0.06);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);}
 .wcc.wmarked{background:var(--green);color:#000;}
 .wcc.wfree{background:var(--purple);color:#fff;}
-.wcc.wwin{background:var(--yellow);color:#000;box-shadow:0 0 8px var(--yellow);animation:winPulse 1s ease-in-out infinite;}
-@keyframes winPulse{0%,100%{box-shadow:0 0 6px var(--yellow);}50%{box-shadow:0 0 16px var(--yellow),0 0 30px rgba(245,158,11,0.3);}}
-.prize-box{background:rgba(26,26,54,0.8);backdrop-filter:blur(8px);border:2px solid var(--yellow);border-radius:14px;padding:10px 24px;margin:4px 0;box-shadow:0 0 30px rgba(245,158,11,0.12);}
-.prize-label{font-size:11px;color:var(--muted);margin-bottom:2px;}
-.prize-amount{font-size:28px;font-weight:900;color:var(--yellow);text-shadow:0 0 12px rgba(245,158,11,0.4);}
+.wcc.wwin{background:var(--yellow);color:#000;box-shadow:0 0 10px var(--yellow);animation:winPulse 1s ease-in-out infinite;}
+@keyframes winPulse{0%,100%{box-shadow:0 0 8px var(--yellow);transform:scale(1);}50%{box-shadow:0 0 20px var(--yellow),0 0 40px rgba(255, 214, 0, 0.4);transform:scale(1.05);}}
+.prize-box{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:2px solid var(--yellow);border-radius:16px;padding:12px 24px;margin:4px 0;box-shadow:0 0 40px rgba(255, 214, 0, 0.2), inset 0 1px 5px rgba(255, 214, 0, 0.2);}
+.prize-label{font-size:11px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.prize-amount{font-size:32px;font-weight:900;color:var(--yellow);text-shadow:0 0 20px rgba(255, 214, 0, 0.6);line-height:1.2;}
 .prize-each{font-size:11px;color:var(--muted);margin-top:2px;}
-.distribute-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:4px;margin:8px 0 4px;overflow:hidden;}
-.distribute-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--yellow));border-radius:4px;width:100%;transition:width 1s linear;}
+.distribute-bar{width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;margin:8px 0 4px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,0.5);}
+.distribute-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--yellow));border-radius:4px;width:100%;transition:width 1s linear;box-shadow:0 0 10px var(--yellow);}
 .next-label{font-size:12px;color:var(--muted);}
 .next-count{font-size:20px;font-weight:700;color:var(--orange);}
 .page-scroll{flex:1;overflow-y:auto;padding:12px;}
@@ -288,11 +297,75 @@ body{font-family:'Outfit',sans-serif;background:radial-gradient(ellipse at top, 
 .stake-btn:active {
   transform: scale(0.96);
 }
+.auth-container{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.auth-box{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:24px;width:100%;max-width:320px;padding:24px;box-shadow:0 10px 40px rgba(0,0,0,0.5);text-align:center;}
+.auth-logo{font-size:48px;margin-bottom:12px;filter:drop-shadow(0 0 15px var(--blue));}
+.auth-title{font-size:24px;font-weight:900;color:var(--text);margin-bottom:20px;letter-spacing:1px;}
+.auth-tabs{display:flex;gap:8px;margin-bottom:20px;background:rgba(0,0,0,0.3);padding:4px;border-radius:12px;}
+.auth-tab{flex:1;padding:8px 0;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:8px;transition:all .3s;}
+.auth-tab.active{background:var(--blue);color:#fff;box-shadow:0 0 10px var(--blue);}
+.auth-form{display:none;flex-direction:column;gap:16px;}
+.auth-form.active{display:flex;animation:slideInUp 0.3s ease-out;}
+.input-group{text-align:left;}
+.input-group label{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;display:block;}
+.input-wrap{position:relative;}
+.auth-input{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:'Outfit',sans-serif;font-size:16px;outline:none;transition:border-color .3s;}
+.auth-input:focus{border-color:var(--blue);box-shadow:0 0 10px rgba(0,212,255,0.2);}
+.auth-input:read-only{color:var(--muted);background:rgba(0,0,0,0.2);}
+.eye-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted);cursor:pointer;}
+.auth-btn{width:100%;background:linear-gradient(135deg,var(--blue),#0077ff);border:none;border-radius:12px;padding:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 5px 15px rgba(0,212,255,0.3);transition:transform 0.2s, filter 0.2s;}
+.auth-btn:active{transform:scale(0.96);}
 </style>
 </head>
 <body>
 <div class="app">
-  
+  <div class="screen" id="screen-auth">
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-logo">🎰</div>
+        <div class="auth-title">BINGIO</div>
+        
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</div>
+          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</div>
+        </div>
+
+        <div class="auth-form active" id="form-login">
+          <div class="input-group">
+            <label>USER ID</label>
+            <div class="input-wrap">
+              <input type="text" id="login-id" class="auth-input" placeholder="e.g. 849312">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>PASSWORD</label>
+            <div class="input-wrap">
+              <input type="password" id="login-pass" class="auth-input" placeholder="••••••••">
+              <span class="eye-icon" onclick="togglePassword('login-pass')">👁️</span>
+            </div>
+          </div>
+          <button class="auth-btn" onclick="doLogin()">ENTER GAME</button>
+        </div>
+
+        <div class="auth-form" id="form-register">
+          <div class="input-group">
+            <label>GENERATED ID</label>
+            <div class="input-wrap">
+              <input type="text" id="reg-id" class="auth-input" readonly>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>CREATE PASSWORD</label>
+            <div class="input-wrap">
+              <input type="password" id="reg-pass" class="auth-input" placeholder="••••••••">
+              <span class="eye-icon" onclick="togglePassword('reg-pass')">👁️</span>
+            </div>
+          </div>
+          <button class="auth-btn" onclick="doRegister()">CREATE ACCOUNT</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="screen" id="screen-stake">
     <div class="stake-container">
       <!-- Replaced Gear Icon with Profile Pic + Title + Username -->
@@ -833,15 +906,10 @@ function updatePlayersDisplay(){var p = game.totalPlayers || selCards.size || 0;
 function selectStake(stake) {
   if (soundOn) sfx.playClick();
   currentStake = stake;
-  currentRoom = String(stake);
+  currentRoom = 'global';
   setTxt('s-bet-stake', currentStake);
   setTxt('w-bet-stake', currentStake);
   setTxt('g-bet-stake', currentStake);
-  if (socket && socket.connected) {
-    var otherRoom = stake === 10 ? '20' : '10';
-    socket.emit('leave_room', {room: otherRoom});
-    socket.emit('join_room', {room: currentRoom});
-  }
   currentGameId = generateGameId();
   setTxt('game-id-label', currentGameId);
   setTxt('w-game-id', currentGameId);
@@ -912,7 +980,109 @@ function updateStakeProfile() {
   }
 }
 
-function initTelegram(){try{if(window.Telegram&&window.Telegram.WebApp){var wa=window.Telegram.WebApp;wa.ready();wa.expand();if(wa.initDataUnsafe&&wa.initDataUnsafe.user){tgUser=wa.initDataUnsafe.user;tgUserId=tgUser.id;updateUserName(tgUser.first_name||'');updateStakeProfile();}}}catch(e){}}
+function initTelegram() {
+  try {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+      var wa = window.Telegram.WebApp;
+      wa.ready();
+      wa.expand();
+      tgUser = wa.initDataUnsafe.user;
+      tgUserId = tgUser.id.toString();
+      updateUserName(tgUser.first_name || '');
+      updateStakeProfile();
+    } else {
+      // Fallback to localStorage for web users
+      var savedId = localStorage.getItem('bingio_user_id');
+      if (savedId) {
+        tgUserId = savedId;
+        tgUser = { id: savedId, first_name: 'Web User', username: savedId };
+        updateStakeProfile();
+      }
+    }
+  } catch (e) {}
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('tab-login').classList.remove('active');
+  document.getElementById('tab-register').classList.remove('active');
+  document.getElementById('form-login').classList.remove('active');
+  document.getElementById('form-register').classList.remove('active');
+  
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('form-' + tab).classList.add('active');
+}
+
+function togglePassword(inputId) {
+  var el = document.getElementById(inputId);
+  if (el.type === 'password') {
+    el.type = 'text';
+  } else {
+    el.type = 'password';
+  }
+}
+
+async function doLogin() {
+  var id = document.getElementById('login-id').value.trim();
+  var pass = document.getElementById('login-pass').value.trim();
+  if (!id || !pass) {
+    alert('Please enter ID and Password');
+    return;
+  }
+  var btn = document.querySelector('#form-login .auth-btn');
+  btn.textContent = 'Verifying...';
+  try {
+    var res = await fetch(API_BASE + '/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ user_id: id, password: pass })
+    });
+    var data = await res.json();
+    if (data.success) {
+      localStorage.setItem('bingio_user_id', data.user_id);
+      tgUserId = data.user_id;
+      tgUser = { id: tgUserId, first_name: 'Web User', username: tgUserId };
+      updateStakeProfile();
+      appInit(); // Re-run init to load data and switch screen
+    } else {
+      alert(data.error || 'Login failed');
+    }
+  } catch (e) {
+    alert('Network error during login');
+  }
+  btn.textContent = 'ENTER GAME';
+}
+
+async function doRegister() {
+  var id = document.getElementById('reg-id').value.trim();
+  var pass = document.getElementById('reg-pass').value.trim();
+  if (!id || !pass) {
+    alert('Please enter a password');
+    return;
+  }
+  var btn = document.querySelector('#form-register .auth-btn');
+  btn.textContent = 'Creating...';
+  try {
+    var res = await fetch(API_BASE + '/api/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ user_id: id, password: pass })
+    });
+    var data = await res.json();
+    if (data.success) {
+      localStorage.setItem('bingio_user_id', data.user_id);
+      tgUserId = data.user_id;
+      tgUser = { id: tgUserId, first_name: 'Web User', username: tgUserId };
+      updateStakeProfile();
+      appInit(); // Re-run init
+    } else {
+      alert(data.error || 'Registration failed');
+    }
+  } catch (e) {
+    alert('Network error during registration');
+  }
+  btn.textContent = 'CREATE ACCOUNT';
+}
+
 async function updateUserName(firstName){if(!tgUserId||!firstName||!apiAvailable)return;try{await fetch(API_BASE+'/api/update_name',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:tgUserId,first_name:firstName,username:tgUser?tgUser.username:''})});}catch(e){}}
 
 function initSocket(){try{socket=io(API_BASE,{transports:['websocket','polling'],reconnection:true,reconnectionDelay:1000,reconnectionAttempts:10,timeout:5000});socket.on('connect',function(){socket.emit('join_room', {room: currentRoom});});socket.on('disconnect',function(){serverDrivingBalls=false;if(game.cards.length>0&&!game.autoIv&&!gamePaused&&!getReadyActive)startAutoGame();});socket.on('max_winners_updated',function(data){if(data.room && data.room !== currentRoom) return; maxWinners=data.max||1;});socket.on('game_paused',function(data){if(data.room && data.room !== currentRoom) return; gamePaused=data.paused;var overlay=document.getElementById('paused-overlay');if(gamePaused){overlay.classList.add('show');stopAutoGame();}else{overlay.classList.remove('show');if(game.cards.length>0&&!game.autoIv&&!gamePaused&&!getReadyActive)startAutoGame();}});socket.on('game_cancelled',function(data){if(data.room && data.room !== currentRoom) return; stopAutoGame();stopWaitDraw();gamePaused=false;getReadyActive=false;document.getElementById('paused-overlay').classList.remove('show');document.getElementById('cancelled-overlay').classList.add('show');});socket.on('countdown_update',function(data){if(data.room && data.room !== currentRoom) return; if(game.cards.length>0)return; currentGameId=data.game_id;setTxt('game-id-label',data.game_id);timeLeft=data.time_left;showSelectScreen();if(!timerIv)startTimer();});socket.on('player_joined',function(data){if(data.room && data.room !== currentRoom) return; game.totalPlayers=data.total_players;updatePlayersDisplay();});socket.on('game_state_update',function(data){if(data.room && data.room !== currentRoom) return; if(data.total_players){game.totalPlayers=data.total_players;updatePlayersDisplay();}});socket.on('ball_called',function(data){if(data.room && data.room !== currentRoom) return; var n=data.number;if(!n)return;markServerDriving();if(getReadyActive){pendingServerBalls.push(n);return;}processBall(n);});socket.on('game_started',function(data){if(data.room && data.room !== currentRoom) return; if(game.cards.length > 0 && data.game_id === game.gameId) {if(data.total_players) {game.totalPlayers = data.total_players;updatePlayersDisplay();}return;}currentGameId=data.game_id;if(data.total_players){game.totalPlayers=data.total_players;updatePlayersDisplay();}stopAutoGame();stopWaitDraw();gamePaused=false;game.called=new Set();game.current=null;game.recentBalls=[];game.callCount=0;waitGame.called=new Set();waitGame.current=null;waitGame.recentBalls=[];waitGame.callCount=0;setTxt('s-call', '0');setTxt('w-call-top', '0');var rbEl=document.getElementById('recent-balls');if(rbEl)rbEl.innerHTML='';var wrbEl=document.getElementById('wait-recent-balls');if(wrbEl)wrbEl.innerHTML='';winnersThisRound=[];myWinReported=false;if(game.cards.length>0){showScreen('screen-game');updatePlayersDisplay();renderNumGrid();renderRecentBalls();renderCurrentBall();renderAllCards();if(!getReadyActive) startAutoGame();}else{showScreen('screen-home');showWaitScreen();}});socket.on('winner_found',function(data){if(data.room && data.room !== currentRoom) return; if(game.cards.length===0)showObserverWinner(data);});socket.on('game_ended',function(data){if(data.room && data.room !== currentRoom) return; stopAutoGame();stopWaitDraw();if(game.cards.length===0)showObserverWinner(data);});}catch(e){}}
@@ -980,7 +1150,40 @@ async function loadLeaderboard(){updateBalanceDisplay();var winners=await fetchT
 async function loadWallet(){updateUserInfo();updateBalanceDisplay();var txs=await fetchTransactions();var rows=document.getElementById('wl-tx-rows');if(!txs.length){rows.innerHTML='<div class="empty-row">No transactions yet</div>';return;}rows.innerHTML=txs.map(function(tx){var cls=(tx.type==='deposit'||tx.type==='bingo_win')?'green':'red';var icon=tx.type==='deposit'?'<i class="fa-solid fa-circle-arrow-down" style="color:var(--green); margin-right:4px;"></i>':tx.type==='bingo_win'?'<i class="fa-solid fa-trophy" style="color:var(--yellow); margin-right:4px;"></i>':tx.type==='withdraw'?'<i class="fa-solid fa-circle-arrow-up" style="color:var(--orange); margin-right:4px;"></i>':'<i class="fa-solid fa-gamepad" style="color:var(--blue); margin-right:4px;"></i>';var date=tx.time?tx.time.split('T')[0]:'—';return '<div class="table-row"><span>'+icon+' '+tx.type+'</span><span class="'+cls+'">'+tx.amount+' Br</span><span class="green">Done</span><span class="muted">'+date+'</span></div>';}).join('');}
 
 function generateGameId(){var letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';var chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';var id=letters.charAt(Math.floor(Math.random()*letters.length))+letters.charAt(Math.floor(Math.random()*letters.length));for(var i=0;i<6;i++){id+=chars.charAt(Math.floor(Math.random()*chars.length));}return id;}
-async function checkGameState(){var state=await fetchGameState();if(state&&state.game_running&&state.call_count>0){currentGameId=state.game_id;setTxt('game-id-label',currentGameId||'—');setTxt('w-game-id',currentGameId||'—');if(state.called_numbers)state.called_numbers.forEach(function(n){waitGame.called.add(n);game.called.add(n);});if(state.total_players){game.totalPlayers=state.total_players;updatePlayersDisplay();}showWaitScreen();}else if(state&&!state.game_running){timeLeft=state.time_left||35;currentGameId=state.game_id||generateGameId();setTxt('game-id-label',currentGameId);setTxt('w-game-id',currentGameId);showSelectScreen();startTimer();}else{currentGameId=generateGameId();setTxt('game-id-label',currentGameId);setTxt('w-game-id',currentGameId);showSelectScreen();startTimer();}}
+async function checkGameState(){
+  var state=await fetchGameState();
+  if(state&&state.game_running){
+    currentGameId=state.game_id;
+    setTxt('game-id-label',currentGameId||'—');
+    setTxt('w-game-id',currentGameId||'—');
+    if(state.called_numbers) {
+      state.called_numbers.forEach(function(n){
+        waitGame.called.add(n);
+        game.called.add(n);
+      });
+    }
+    if(state.total_players){
+      game.totalPlayers=state.total_players;
+      updatePlayersDisplay();
+    }
+    showWaitScreen();
+    // Do not start wait draw if we are spectating an active game
+    stopWaitDraw();
+  }else if(state&&!state.game_running){
+    timeLeft=state.time_left||35;
+    currentGameId=state.game_id||generateGameId();
+    setTxt('game-id-label',currentGameId);
+    setTxt('w-game-id',currentGameId);
+    showSelectScreen();
+    startTimer();
+  }else{
+    currentGameId=generateGameId();
+    setTxt('game-id-label',currentGameId);
+    setTxt('w-game-id',currentGameId);
+    showSelectScreen();
+    startTimer();
+  }
+}
 
 function showWaitScreen(){document.getElementById('select-area').style.display='none';document.getElementById('wait-area').style.display='flex';document.getElementById('home-topbar').style.display='none';startWaitDraw();}
 function showSelectScreen(){document.getElementById('select-area').style.display='';document.getElementById('wait-area').style.display='none';document.getElementById('home-topbar').style.display='flex';stopWaitDraw();}
@@ -1257,7 +1460,7 @@ function renderCard(ci){
 function renderAllCards(){for(var ci=0;ci<game.cards.length;ci++)renderCard(ci);}
 
 function renderRecentBalls(){document.getElementById('recent-balls').innerHTML=game.recentBalls.slice(-4).map(function(n){var L=letterFor(n);return '<div class="rball" style="background:'+COL_COLORS[L]+';color:'+COL_TEXT[L]+'"><span class="rl">'+L+'</span><span class="rn">'+n+'</span></div>';}).join('');}
-function renderCurrentBall(){if(!game.current)return;var n=game.current,L=letterFor(n);var el=document.getElementById('current-big');el.style.background=COL_COLORS[L];el.style.color=COL_TEXT[L];el.style.boxShadow='0 0 20px '+COL_COLORS[L];var cbnEl=document.getElementById('cb-num');cbnEl.style.fontSize='22px';cbnEl.style.lineHeight='1';setTxt('cb-letter',L+'-');cbnEl.textContent=n;var currentLabelEl=document.getElementById('game-current-label');if(currentLabelEl)currentLabelEl.textContent='Current';el.classList.remove('animate-pop');void el.offsetWidth;el.classList.add('animate-pop');}
+function renderCurrentBall(){if(!game.current)return;var n=game.current,L=letterFor(n);var el=document.getElementById('current-big');el.style.background=COL_COLORS[L];el.style.color=COL_TEXT[L];el.style.boxShadow='0 0 20px '+COL_COLORS[L];var cbnEl=document.getElementById('cb-num');cbnEl.style.fontSize='22px';cbnEl.style.lineHeight='1';setTxt('cb-letter',L+'-');cbnEl.textContent=n;var currentLabelEl=document.getElementById('game-current-label');if(currentLabelEl)currentLabelEl.textContent='Current';el.classList.remove('ball-pop');void el.offsetWidth;el.classList.add('ball-pop');}
 
 // speakNumber now uses the MP3 audio engine instead of SpeechSynthesis
 function speakNumber(n){
@@ -1303,8 +1506,7 @@ function checkWin(ci){
 function finalizeWinner(){
   stopAutoGame();
   var realPlayers=game.totalPlayers||game.cardNums.length||1;
-  var totalPot=realPlayers*currentStake;
-  var totalPrize=Math.round(totalPot*0.8);
+  var totalPrize=game.totalPrize || 0; // Got from server game_ended
   var winnerCount=Math.max(winnersThisRound.length,1);
   var prizeEach=Math.floor(totalPrize/winnerCount);
   
@@ -1517,11 +1719,67 @@ function showScreen(id){
 buildGrid();
 initTelegram();
 initSocket();
-fetchBalance().then(function(){
-  updateUserInfo();
-  checkGameState();
-  showScreen('screen-stake');
-});
+function setupOverrides() {
+  if (!socket) return;
+  socket.on('player_joined', function(data) {
+    if(data.room && data.room !== currentRoom) return; 
+    game.totalPlayers=data.total_players;
+    game.totalPot=data.total_pot;
+    updatePlayersDisplay();
+  });
+  socket.on('game_state_update', function(data) {
+    if(data.room && data.room !== currentRoom) return; 
+    if(data.total_players){
+      game.totalPlayers=data.total_players;
+      updatePlayersDisplay();
+    }
+  });
+  socket.off('game_ended');
+  socket.on('game_ended', function(data) {
+    if(data.room && data.room !== currentRoom) return; 
+    stopAutoGame();
+    stopWaitDraw();
+    if(game.cards.length===0) {
+      showObserverWinner(data);
+    } else {
+      game.totalPrize = data.total_prize;
+      // Wait, finalizeWinner handles local winning state. If we receive game_ended, it means the server finalized the game.
+      if (data.winners && data.winners.length > 0) {
+        winnersThisRound = data.winners.map(function(w) {
+          return {
+            userId: w.userId,
+            name: w.name,
+            cardNum: w.cardNum,
+            cardIndex: w.cardIndex,
+            card: w.userId === tgUserId ? game.cards[w.cardIndex] : null,
+            marked: w.userId === tgUserId ? game.marked[w.cardIndex] : new Set(),
+            wonLines: w.userId === tgUserId ? game.wonLines[w.cardIndex] : new Set()
+          };
+        });
+      }
+      finalizeWinner();
+    }
+  });
+}
+setupOverrides();
+function appInit() {
+  if (tgUserId) {
+    // Authenticated via Telegram or localStorage
+    fetchBalance().then(function(){
+      updateUserInfo();
+      checkGameState();
+      showScreen('screen-stake');
+    });
+  } else {
+    // Show Auth Screen
+    showScreen('screen-auth');
+    // Generate a random ID for the register tab
+    document.getElementById('reg-id').value = 'WEB-' + Math.floor(100000 + Math.random() * 900000);
+  }
+}
+
+setupOverrides();
+appInit();
 </script>
 </body>
 </html>
